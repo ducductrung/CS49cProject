@@ -20,6 +20,7 @@ typedef struct card{
 typedef struct hand{
     Card card; //hold first card of hand, Set card = NULL if empty hand
     int numOfCard;
+    int currentPoint;
 } Hand;
 
 typedef struct player{
@@ -35,7 +36,7 @@ void playGame(Player *playerList, int count);
 void shuffle( int [][ 13 ] );
 void dealSingle( const int wDeck[][ 13 ], Card *newCard, unsigned int *cardIndex);
 void deal( const int wDeck[][ 13 ],  Card *newCard, unsigned int *cardIndex, int numOfCardToDeal);
-int getPoints(Card card);
+int getNewPoints(Hand *hand,Card card);
 void addToHand(Hand *hand, Card newCard);
 
 //Hold cards
@@ -163,7 +164,7 @@ void deal( const int wDeck[][ 13 ], Card *newCard, unsigned int *cardIndex, int 
  * Check player hand and return points of hand
  * @param card the first card of player
  */
-int getPoints(Card card){
+int getNewPoints(Hand *hand,Card card){
     
     int totalPoint = 0;
     int numOfAce = 0;
@@ -181,13 +182,18 @@ int getPoints(Card card){
         }
 
         totalPoint+=cardValue;
-        
         card=*card.next;
     }
     
-    while (numOfAce>0) {
-        if (totalPoint) {
-            <#statements#>
+    if (totalPoint+numOfAce == 21 || totalPoint+numOfAce > 21) return totalPoint+numOfAce;
+    
+    else{
+        while (numOfAce>0) {
+            totalPoint+=11;
+            --numOfAce;
+            if (totalPoint+numOfAce < 21) continue;
+            else if (totalPoint+numOfAce == 21) return totalPoint+numOfAce;
+            else return totalPoint+numOfAce;
         }
     }
     return totalPoint;
@@ -205,4 +211,5 @@ void addToHand(Hand *hand, Card newCard){
         hand->card = newCard;
         hand->numOfCard++;
     }
+    hand->currentPoint = getNewPoints(hand, newCard);
 }
