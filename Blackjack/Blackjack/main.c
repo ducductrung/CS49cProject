@@ -26,16 +26,17 @@ typedef struct hand{
 typedef struct player{
     char name[20];
     int cash;
-    Hand hand;
+    Hand hand1;
+    Hand hand2;
 } Player;
 
 //prototypes
-void mainMenu(int count, Player *playerList);
-void newPlayer(Player player);
-void playGame(Player *playerList, int count);
+void mainMenu(int *playerCount, Player *playerList);
+void newPlayer(Player *player);
+void playGame(Player *playerList, int *playerCount);
 void shuffle( int [][ 13 ] );
-void dealSingle( const int wDeck[][ 13 ], Card *newCard, unsigned int *cardIndex);
-void deal( const int wDeck[][ 13 ],  Card *newCard, unsigned int *cardIndex, int numOfCardToDeal);
+void dealSingle( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex);
+void deal( const int wDeck[][ 13 ],  Hand *hand, unsigned int *cardIndex, int numOfCardToDeal);
 int getNewPoints(Hand *hand,Card card);
 void addToHand(Hand *hand, Card newCard);
 
@@ -44,73 +45,85 @@ const char *suit[ 4 ] = { "Hearts", "Diamonds", "Clubs", "Spades" };
 const char *face[ 13 ] = { "Ace", "Deuce", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King" };
 int deck[ 4 ][ 13 ] = { 0 };
 
+//Hold max number of player
+#define MAX_PLAYER 5
+
 int main(int argc, const char * argv[]) {
     
-    printf("Test functions: \n");
-    shuffle(deck);
-    printf("\tShuffled deck\n");
-    unsigned int cardIndex = 0;
-    Card newCard;
-    deal(deck, &newCard, &cardIndex, 1);
-    printf("\tDeal card: %s of %s\n", face[newCard.face], suit[newCard.suite]);
-    Hand newHand;
-    printf(" print empty hand: %d\n\n", newHand.card.face);
+    //Testing code
+//    printf("Test functions: \n");
+//    shuffle(deck);
+//    printf("\tShuffled deck\n");
+//    unsigned int cardIndex = 0;
+//    Card newCard;
+//    deal(deck, &newCard, &cardIndex, 1);
+//    printf("\tDeal card: %s of %s\n", face[newCard.face], suit[newCard.suite]);
+//    Hand newHand;
+//    printf(" print empty hand: %d\n\n", newHand.card.face);
     
     
     int playerCount = 1; // initialize to 1 b/c dealer counts as a player
-    Player playersList[] = {};
+    Player playersList[MAX_PLAYER];
     printf("WELCOME TO BLACKJACK\n");
     
-    mainMenu(playerCount, playersList);
+    mainMenu(&playerCount, playersList);
     
     return 0;
 }
+
 /*
  * Displays main menu of the game
  * @param
  */
-void mainMenu(int count, Player *playerList) {
+void mainMenu(int *playerCount, Player *playerList) {
     int selection = -1;
-    
     
     printf("Select an option: [1] New Player - [2] Play - [3] (will add more options later)\n");
     scanf("%d", &selection);
     
     switch (selection) {
         case 1: // new player
-            newPlayer(playerList[++count]);
-            mainMenu(count, playerList);
+            newPlayer(&playerList[*playerCount]);
+            *playerCount +=1;
+            mainMenu(playerCount, playerList);
             break;
         case 2: //play game
-            playGame(playerList, count);
+            playGame(playerList, playerCount);
             break;
         default:
             break;
     }
 }
+
 /*
  * New player enters his/her new player information
  * @param
  */
-void newPlayer(Player player) {
+void newPlayer(Player *player) {
     printf("Please enter your name: \n");
-    scanf("%s", &player.name);
+    fgets(player->name, 20, stdin);
     
     printf("Enter how much cash you wish to play with: \n");
-    scanf("%d", &player.cash);
+    scanf("%d", &player->cash);
     
     //test
-    printf("name: %s - cash: $%d\n", player.name, player.cash);
+    printf("name: %s - cash: $%d\n", player->name, player->cash);
 }
+
 /*
  *
  * Simulates the gameplay between players and dealer
  * @param
  */
-void playGame(Player *playerList, int count) {
+void playGame(Player *playerList, int *playerCount) {
     
     //TODO: call shuffle method, deal method
     shuffle(deck);
+    
+    //Deals cards to each player
+    for (size_t i = 0; i<*playerCount; i++) {
+//        deal(deck, <#Card *card#>, <#unsigned int *cardIndex#>, <#int numOfCardToDeal#>)
+    }
     
     
 }
@@ -132,15 +145,16 @@ void shuffle( int wDeck[][ 13 ] )
     }
 }
 
-void dealSing( const int wDeck[][ 13 ], Card *newCard, unsigned int *cardIndex){
-    return deal(wDeck, newCard, cardIndex, 1);
+void dealSing( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex){
+    return deal(wDeck, hand, cardIndex, 1);
 }
 
 //Deal 1 card and save it to pointer card
-void deal( const int wDeck[][ 13 ], Card *newCard, unsigned int *cardIndex, int numOfCardToDeal)
+void deal( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex, int numOfCardToDeal)
 {
     int row, column;
     unsigned int finalCardIndex = *cardIndex + numOfCardToDeal;
+    Card *ptr = &hand->card;
     //    printf("carIndex: %u", *cardIndex);
     //    printf("finalCardIndex: %u", finalCardIndex);
     
@@ -151,9 +165,23 @@ void deal( const int wDeck[][ 13 ], Card *newCard, unsigned int *cardIndex, int 
             for ( column = 0; column <= 12; column++ )
                 
                 if ( wDeck[ row ][ column ] == *cardIndex ){
-                    newCard->face = column;
-                    newCard->suite = row;
-                    printf( "\t%5s of %-8s%c",
+                    if (ptr->face == 0) {
+                        ptr->face = column;
+                        ptr->suite = row;
+                        ptr->next = NULL;
+                    }
+                    else{
+                        while (ptr->next != NULL) {
+                            ptr = ptr->next;
+                        }
+                        Card newCard;
+                        newCard.face=column;
+                        newCard.suite=row;
+                        newCard.next=NULL;
+                        
+                        ptr->next=&newCard;
+                    }
+                    printf( "Card deal: \t%5s of %-8s%c",
                            face[ column ], suit[ row ],
                            *cardIndex % 2 == 0 ? '\n' : '\t' );
                 }
@@ -212,4 +240,23 @@ void addToHand(Hand *hand, Card newCard){
         hand->numOfCard++;
     }
     hand->currentPoint = getNewPoints(hand, newCard);
+}
+
+//Check if current hand is splitable
+//return 0 if false
+//return 1 if true
+int splitable(Hand hand){
+    if(hand.numOfCard==2){
+        int face = hand.card.face;
+        if (hand.card.next->face == face) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+//Split hand into 2 hands
+void split(Player *player){
+    player->hand2.card = *player->hand1.card.next;
+    player->hand1.card.next = NULL;
 }
