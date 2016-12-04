@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stddef.h>
 
 typedef struct card{
     int face; //hold index of face in face[]
@@ -35,10 +36,11 @@ void mainMenu(int *playerCount, Player *playerList);
 void newPlayer(Player *player);
 void playGame(Player *playerList, int *playerCount);
 void shuffle( int [][ 13 ] );
-void dealSingle( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex);
-void deal( const int wDeck[][ 13 ],  Hand *hand, unsigned int *cardIndex, int numOfCardToDeal);
+void dealSingle( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex, int isDealer);
+void deal( const int wDeck[][ 13 ],  Hand *hand, unsigned int *cardIndex, int numOfCardToDeal, int isDealer);
 int getNewPoints(Hand *hand,Card card);
 void addToHand(Hand *hand, Card newCard);
+void displayCurrentHand(Hand *hand);
 
 //Hold cards
 const char *suit[ 4 ] = { "Hearts", "Diamonds", "Clubs", "Spades" };
@@ -47,20 +49,25 @@ int deck[ 4 ][ 13 ] = { 0 };
 
 //Hold max number of player
 #define MAX_PLAYER 5
+#define INITIAL_CARDS 2
 
 int main(int argc, const char * argv[]) {
-    
+    /*
     //Testing code
-//    printf("Test functions: \n");
-//    shuffle(deck);
-//    printf("\tShuffled deck\n");
-//    unsigned int cardIndex = 0;
-//    Card newCard;
-//    deal(deck, &newCard, &cardIndex, 1);
-//    printf("\tDeal card: %s of %s\n", face[newCard.face], suit[newCard.suite]);
-//    Hand newHand;
-//    printf(" print empty hand: %d\n\n", newHand.card.face);
-    
+    printf("Test functions: \n");
+    shuffle(deck);
+    printf("\tShuffled deck\n");
+     
+    shuffle(deck);
+    unsigned int cardIndex = 0;
+    Card newCard;
+    Hand newHand;
+    deal(deck, &newHand, &cardIndex, 2);
+    */
+    //printf("\tDeal card: %s of %s\n", face[newCard.face], suit[newCard.suite]);
+    //Hand newHand;
+    //printf(" print empty hand: %d\n\n", newHand.card.face);
+   
     
     int playerCount = 1; // initialize to 1 b/c dealer counts as a player
     Player playersList[MAX_PLAYER];
@@ -75,7 +82,7 @@ int main(int argc, const char * argv[]) {
  * Displays main menu of the game
  * @param
  */
-void mainMenu(int *playerCount, Player *playerList) {
+void mainMenu(int *playerCount, Player playerList[]) {
     int selection = -1;
     
     printf("Select an option: [1] New Player - [2] Play - [3] (will add more options later)\n");
@@ -101,7 +108,8 @@ void mainMenu(int *playerCount, Player *playerList) {
  */
 void newPlayer(Player *player) {
     printf("Please enter your name: \n");
-    fgets(player->name, 20, stdin);
+    //fgets(player->name, 20, stdin);
+    scanf("%s", &player->name);
     
     printf("Enter how much cash you wish to play with: \n");
     scanf("%d", &player->cash);
@@ -117,15 +125,69 @@ void newPlayer(Player *player) {
  */
 void playGame(Player *playerList, int *playerCount) {
     
-    //TODO: call shuffle method, deal method
+    //shuffle the deck
     shuffle(deck);
     
-    //Deals cards to each player
-    for (size_t i = 0; i<*playerCount; i++) {
-//        deal(deck, <#Card *card#>, <#unsigned int *cardIndex#>, <#int numOfCardToDeal#>)
+    //deal first hand
+    unsigned int cardIndex = 1;
+    size_t i;
+
+    for (i = 0; i<*playerCount; ++i) {
+            if (i == 0) {
+                //test
+                printf("Dealer Hand\n");
+                deal(deck, &playerList[i].hand1, &cardIndex, 2, 0);
+//                printf("\n--test-- dealing dealers cards (hidden)");
+            } else {
+                printf("\nPlayer %zu\n", i);
+                deal(deck, &playerList[i].hand1, &cardIndex, 2, 0);
+            }
     }
     
+    int points;
+    //Ask if player want to stay or hit
+    for (i = 1; i<*playerCount; ++i) {
+        int stay = 0;
+        while (!stay) {
+            int decision;
+            
+            printf("\n Do you want to hit? [Y] Yes - [N] No: \n");
+            fflush(stdin);
+            scanf("%d", &decision);
+            printf("Decision: %d\n", decision);
+            
+            switch (decision) {
+                case 1: {
+
+                    dealSingle(deck, &playerList[i].hand1, &cardIndex, 0);
+                    displayCurrentHand(&playerList[i].hand1);
+                    
+                    
+                }
+                    break;
+                case 0: {
+                    stay = 1;
+                    points = getNewPoints(&playerList[i].hand1, playerList[i].hand1.card);
+                    printf("Your point total: %d", points);
+                }
+                    break;
+                
+                default:
+                    printf("\n ENTER VALID INPUT");
+                    
+                    break;
+            } //end of switch
+        } //end of while
+    } //end of for
     
+    
+    points = getNewPoints(&playerList[0].hand1, playerList[0].hand1.card);
+    printf("\nDealer current point: %d", points);
+    while ( points < 16) {
+        dealSingle(deck, &playerList[0].hand1, &cardIndex, 1);
+        points = getNewPoints(&playerList[0].hand1, playerList[0].hand1.card);
+        printf("%d", points);
+    }
 }
 
 //Shuffle the deck
@@ -145,46 +207,46 @@ void shuffle( int wDeck[][ 13 ] )
     }
 }
 
-void dealSing( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex){
-    return deal(wDeck, hand, cardIndex, 1);
+void dealSingle( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex, int isDealer){
+    return deal(wDeck, hand, cardIndex, 1, isDealer);
 }
 
 //Deal 1 card and save it to pointer card
-void deal( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex, int numOfCardToDeal)
+void deal( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex, int numOfCardToDeal, int isDealer)
 {
     int row, column;
     unsigned int finalCardIndex = *cardIndex + numOfCardToDeal;
     Card *ptr = &hand->card;
+//    Card *previousPtr = NULL;
     //    printf("carIndex: %u", *cardIndex);
     //    printf("finalCardIndex: %u", finalCardIndex);
     
-    for ( ; *cardIndex < finalCardIndex; *cardIndex = *cardIndex + 1 )
+    for ( ; *cardIndex < finalCardIndex; *cardIndex = *cardIndex + 1 ){
         
-        for ( row = 0; row <= 3; row++ )
+        for ( row = 0; row <= 3; row++ ){
             
-            for ( column = 0; column <= 12; column++ )
+            for ( column = 0; column <= 12; column++ ){
                 
                 if ( wDeck[ row ][ column ] == *cardIndex ){
-                    if (ptr->face == 0) {
-                        ptr->face = column;
-                        ptr->suite = row;
-                        ptr->next = NULL;
+                    
+                    while (ptr->next != NULL) {
+                        ptr = ptr->next;
                     }
-                    else{
-                        while (ptr->next != NULL) {
-                            ptr = ptr->next;
-                        }
-                        Card newCard;
-                        newCard.face=column;
-                        newCard.suite=row;
-                        newCard.next=NULL;
-                        
-                        ptr->next=&newCard;
+                    ptr->next = malloc(sizeof(Card));
+                    ptr->next->face = column;
+                    ptr->next->suite = row;
+                    hand->numOfCard+=1;
+                    
+                    if (!isDealer) {
+                        printf( "Card deal: \t%5s of %-8s%c\n",
+                               face[ column ], suit[ row ],
+                               *cardIndex % 2 == 0 ? '\n' : '\t' );
                     }
-                    printf( "Card deal: \t%5s of %-8s%c",
-                           face[ column ], suit[ row ],
-                           *cardIndex % 2 == 0 ? '\n' : '\t' );
+                    
                 }
+            }
+        }
+    }
 }
 
 /*
@@ -196,12 +258,13 @@ int getNewPoints(Hand *hand,Card card){
     
     int totalPoint = 0;
     int numOfAce = 0;
-    
-    while (card.next!=NULL) {
+    card = *card.next;
+    while (&card != NULL) {
         int cardValue = card.face + 1;
         
         if(cardValue==1){
             ++numOfAce;
+            card = *card.next;
             continue;
         }
         
@@ -210,7 +273,10 @@ int getNewPoints(Hand *hand,Card card){
         }
 
         totalPoint+=cardValue;
-        card=*card.next;
+        if (card.next != NULL) {
+            card=*card.next;
+        }
+        else break;
     }
     
     if (totalPoint+numOfAce == 21 || totalPoint+numOfAce > 21) return totalPoint+numOfAce;
@@ -260,3 +326,17 @@ void split(Player *player){
     player->hand2.card = *player->hand1.card.next;
     player->hand1.card.next = NULL;
 }
+void displayCurrentHand(Hand *hand) {
+    Card *ptr = &hand->card;
+    
+    printf("Hand\n");
+    while (ptr != NULL) {
+        ptr = ptr->next;
+        if (ptr!=NULL) {
+            printf("\t%s %s\n", face[ptr->face], suit[ptr->suite]);
+        }
+        
+        
+    }
+}
+
