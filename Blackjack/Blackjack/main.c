@@ -29,6 +29,7 @@ typedef struct player{
     int cash;
     Hand hand1;
     Hand hand2;
+    int quit;
 } Player;
 
 //prototypes
@@ -41,6 +42,11 @@ void deal( const int wDeck[][ 13 ],  Hand *hand, unsigned int *cardIndex, int nu
 int getNewPoints(Hand *hand,Card card);
 void addToHand(Hand *hand, Card newCard);
 void displayCurrentHand(Hand *hand);
+void subtractCash(Player player, int bet);
+void addCash(Player player, int bet);
+int getPlayerCash(Player player);
+int atLeastOnePlayerIn(Player *playerList, int *playerCount);
+
 
 //Hold cards
 const char *suit[ 4 ] = { "Hearts", "Diamonds", "Clubs", "Spades" };
@@ -52,23 +58,6 @@ int deck[ 4 ][ 13 ] = { 0 };
 #define INITIAL_CARDS 2
 
 int main(int argc, const char * argv[]) {
-    /*
-    //Testing code
-    printf("Test functions: \n");
-    shuffle(deck);
-    printf("\tShuffled deck\n");
-     
-    shuffle(deck);
-    unsigned int cardIndex = 0;
-    Card newCard;
-    Hand newHand;
-    deal(deck, &newHand, &cardIndex, 2);
-    */
-    //printf("\tDeal card: %s of %s\n", face[newCard.face], suit[newCard.suite]);
-    //Hand newHand;
-    //printf(" print empty hand: %d\n\n", newHand.card.face);
-   
-    
     int playerCount = 1; // initialize to 1 b/c dealer counts as a player
     Player playersList[MAX_PLAYER];
     printf("WELCOME TO BLACKJACK\n");
@@ -84,7 +73,11 @@ int main(int argc, const char * argv[]) {
  */
 void mainMenu(int *playerCount, Player playerList[]) {
     int selection = -1;
-    
+    int i;
+    //initialize playerlist back to 0
+    for(i = 0; i < 5; i++){
+        playerList[i].hand1.currentPoint = 0;
+    }
     printf("Select an option: [1] New Player - [2] Play - [3] (will add more options later)\n");
     scanf("%d", &selection);
     
@@ -95,7 +88,12 @@ void mainMenu(int *playerCount, Player playerList[]) {
             mainMenu(playerCount, playerList);
             break;
         case 2: //play game
+        {
+            for (size_t i = 0; i<*playerCount; ++i) {
+                playerList[i].quit = 0;
+            }
             playGame(playerList, playerCount);
+        }
             break;
         default:
             break;
@@ -125,69 +123,165 @@ void newPlayer(Player *player) {
  */
 void playGame(Player *playerList, int *playerCount) {
     
-    //shuffle the deck
-    shuffle(deck);
     
-    //deal first hand
-    unsigned int cardIndex = 1;
-    size_t i;
-
-    for (i = 0; i<*playerCount; ++i) {
-            if (i == 0) {
-                //test
-                printf("Dealer Hand\n");
-                deal(deck, &playerList[i].hand1, &cardIndex, 2, 0);
-//                printf("\n--test-- dealing dealers cards (hidden)");
-            } else {
-                printf("\nPlayer %zu\n", i);
-                deal(deck, &playerList[i].hand1, &cardIndex, 2, 0);
-            }
-    }
     
-    int points;
-    //Ask if player want to stay or hit
-    for (i = 1; i<*playerCount; ++i) {
-        int stay = 0;
-        while (!stay) {
-            int decision;
-            
-            printf("\n Do you want to hit? [Y] Yes - [N] No: \n");
-            fflush(stdin);
-            scanf("%d", &decision);
-            printf("Decision: %d\n", decision);
-            
-            switch (decision) {
-                case 1: {
-
-                    dealSingle(deck, &playerList[i].hand1, &cardIndex, 0);
-                    displayCurrentHand(&playerList[i].hand1);
-                    
-                    
-                }
-                    break;
-                case 0: {
-                    stay = 1;
-                    points = getNewPoints(&playerList[i].hand1, playerList[i].hand1.card);
-                    printf("Your point total: %d", points);
-                }
-                    break;
+    
+LOOP:   while (atLeastOnePlayerIn(playerList, playerCount) == 1) {
+        puts("---top of while loop");
+        //hold card index
+        unsigned int cardIndex = 1;
+        
+        //hold variables
+        size_t i;
+        
+        //hold array of points for each player
+        int pointArray[MAX_PLAYER] = {0};
+        
+        int betArray[MAX_PLAYER] = {0};
+        
+        
+        //shuffle the deck
+        puts("---before shuffle called");
+        shuffle(deck);
+        puts("---after shuffle called");
+        
+        //Betting for each player
+        for (i = 1; i<*playerCount; ++i) {
+            puts("---inside for loop");
+            if (playerList[i].quit == 0) {
+                int input = 1;
+                printf("\n (%s) Enter [0] if you wish to quit or [1] to continue\n", playerList[i].name);
+                scanf("%d", &input);
                 
-                default:
-                    printf("\n ENTER VALID INPUT");
+                if (input == 0) {
+                    playerList[i].quit = 1;
+                    if (atLeastOnePlayerIn(playerList, playerCount)) {
+                        continue;
+                    } else {
+                        mainMenu(playerCount, playerList);
+                    }
                     
-                    break;
-            } //end of switch
-        } //end of while
-    } //end of for
+                } else {
+                    printf("\n (%s) Enter a Bet (Min. = $5): \n", playerList[i].name);
+                    scanf("%d", &betArray[i]);
+                    
+                    //test
+                    printf("\n==TEST BEFORE BET: CURRENT CASH $%d", getPlayerCash(playerList[i]));
+                    playerList[i].cash = playerList[i].cash - betArray[i];
+                    //test
+                    printf("\n==TEST AFTER BET: CURRENT CASH $%d", getPlayerCash(playerList[i]));
+                }
+            }
+        } //end of for
+        
+        //Deal first hand
+        for (i = 0; i<*playerCount; ++i) {
+            if (playerList[i].quit == 0) {
+                if (i == 0) {
+                    //test
+                    printf("\nDealer Hand\n");
+                    deal(deck, &playerList[i].hand1, &cardIndex, 2, 0);
+                    printf("\n--test-- dealing dealers cards (hidden)");
+                } else {
+                    printf("\nPlayer %s\n", playerList[i].name);
+                    deal(deck, &playerList[i].hand1, &cardIndex, 2, 0);
+                }
+            }
+        } //end of for
+        
+        //Ask if player want to stay or hit
+        for (i = 1; i<*playerCount; ++i) {
+            if (playerList[i].quit == 0) {
+                int stay = 0;
+                while (!stay) {
+                    int decision;
+                    
+                    printf("\n (%s)Do you want to hit? [1] Yes - [0] No: \n", playerList[i].name);
+                    fflush(stdin);
+                    scanf("%d", &decision);
+                    printf("Decision: %d\n", decision);
+                    
+                    switch (decision) {
+                        case 1: {
+                            
+                            dealSingle(deck, &playerList[i].hand1, &cardIndex, 0);
+                            displayCurrentHand(&playerList[i].hand1);
+                            
+                            
+                        }
+                            break;
+                        case 0: {
+                            stay = 1;
+                            pointArray[i] = getNewPoints(&playerList[i].hand1, playerList[i].hand1.card);
+                            printf("%s's point total: %d", playerList[i].name ,pointArray[i]);
+                        }
+                            break;
+                            
+                        default:
+                            printf("\n ENTER VALID INPUT");
+                            
+                            break;
+                    } //end of switch
+                } //end of while
+            } //end of if
+        } //end of for
     
+        //Get dealer point
+        int dpoints = 0;
+        dpoints = getNewPoints(&playerList[0].hand1, playerList[0].hand1.card);
+        
+        //Draw card if less than 16 points
+        while ( dpoints < 16) {
+            dealSingle(deck, &playerList[0].hand1, &cardIndex, 1);
+            dpoints = getNewPoints(&playerList[0].hand1, playerList[0].hand1.card);
+        }
+        printf("\nDealer current point: %d\n", dpoints);
+        
+        //check winner of hand for each player
+        for (i = 1; i<*playerCount; ++i){
+            if (playerList[i].quit == 0){
+                if (dpoints == pointArray[i]) {
+                    printf("\n(%s) YOU PUSH!\n", playerList[i].name);
+                    addCash(playerList[1], betArray[i]);
+                    //test
+                    printf("==TEST AFTER PUSH: CURRENT CASH $%d\n", getPlayerCash(playerList[1]));
+                    
+                } else if (dpoints > pointArray[i] ) {
+                    if (pointArray[i] < 21 && dpoints <= 21) {
+                        printf("\n(%s) YOU LOSE\n!", playerList[i].name);
+                    } else if (pointArray[i] > 21 && dpoints > 21) {
+                        printf("\n(%s) YOU PUSH!\n", playerList[i].name);
+                        addCash(playerList[1], betArray[i]);
+                        //test
+                        printf("==TEST AFTER PUSH: CURRENT CASH $%d\n", getPlayerCash(playerList[1]));
+                    }
+                    
+                } else if (dpoints < pointArray[i]) {
+                    if (pointArray[i] <= 21 && dpoints < 21) {
+                        printf("\n(%s) YOU WIN\n!", playerList[i].name);
+                        addCash(playerList[1], betArray[i] * 2);
+                        //test
+                        printf("==TEST AFTER WIN: CURRENT CASH $%d\n", getPlayerCash(playerList[1]));
+                    } else if (pointArray[i] > 21 && dpoints > 21) {
+                        printf("\n(%s) YOU PUSH!\n", playerList[i].name);
+                        addCash(playerList[1], betArray[i]);
+                        //test
+                        printf("==TEST AFTER PUSH: CURRENT CASH $%d\n", getPlayerCash(playerList[1]));
+                    }
+                    
+                } else {
+                    printf("\n UNTESTED");
+                }
+                
+            }
+           // pointArray[i] = 0;
+        }
+        //dpoints = 0;
+
+    } //end of while loop
     
-    points = getNewPoints(&playerList[0].hand1, playerList[0].hand1.card);
-    printf("\nDealer current point: %d", points);
-    while ( points < 16) {
-        dealSingle(deck, &playerList[0].hand1, &cardIndex, 1);
-        points = getNewPoints(&playerList[0].hand1, playerList[0].hand1.card);
-        printf("%d", points);
-    }
+    //goes back to main menu,
+    //mainMenu(playerCount, playerList);
 }
 
 //Shuffle the deck
@@ -196,6 +290,11 @@ void shuffle( int wDeck[][ 13 ] )
     int row, column, card;
     time_t t;
     srand((unsigned) time(&t));
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 13; j++) {
+            wDeck[i][j] = 0;
+        }
+    }
     
     for ( card = 1; card <= 52; card++ ) {
         do {
@@ -254,17 +353,18 @@ void deal( const int wDeck[][ 13 ], Hand *hand, unsigned int *cardIndex, int num
  * Check player hand and return points of hand
  * @param card the first card of player
  */
-int getNewPoints(Hand *hand,Card card){
+int getNewPoints(Hand *hand, Card cardIn){
     
     int totalPoint = 0;
     int numOfAce = 0;
-    card = *card.next;
-    while (&card != NULL) {
-        int cardValue = card.face + 1;
+    Card *ptr = &cardIn;
+    ptr = ptr->next;
+    while (ptr != NULL) {
+        int cardValue = ptr->face + 1;
         
         if(cardValue==1){
             ++numOfAce;
-            card = *card.next;
+            ptr = ptr->next;
             continue;
         }
         
@@ -273,8 +373,8 @@ int getNewPoints(Hand *hand,Card card){
         }
 
         totalPoint+=cardValue;
-        if (card.next != NULL) {
-            card=*card.next;
+        if (ptr->next != NULL) {
+            ptr=ptr->next;
         }
         else break;
     }
@@ -326,6 +426,7 @@ void split(Player *player){
     player->hand2.card = *player->hand1.card.next;
     player->hand1.card.next = NULL;
 }
+//Displays a list of a players hand
 void displayCurrentHand(Hand *hand) {
     Card *ptr = &hand->card;
     
@@ -335,8 +436,27 @@ void displayCurrentHand(Hand *hand) {
         if (ptr!=NULL) {
             printf("\t%s %s\n", face[ptr->face], suit[ptr->suite]);
         }
-        
-        
     }
 }
+//takes money from players bank
+void subtractCash(Player player, int bet) {
+    player.cash = player.cash - bet;
+}
+//adds cash to players bank
+void addCash(Player player, int bet) {
+    player.cash = player.cash + bet;
+}
+//retrieves players cash
+int getPlayerCash(Player player) {
+    return player.cash;
+}
+//check if there is at least one player that is still in the game
+int atLeastOnePlayerIn(Player *playerList, int *playerCount) {
+    for (size_t i = 1; i < *playerCount; i++) {
+        if (playerList[i].quit == 0)
+            return 1;
+    }
+    return 0;
+}
+
 
