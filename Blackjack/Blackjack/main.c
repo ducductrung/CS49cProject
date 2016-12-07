@@ -134,9 +134,6 @@ void newPlayer(Player *player) {
  */
 void playGame(Player *playerList, int *playerCount) {
     
-    
-    
-    
 LOOP:   while (atLeastOnePlayerIn(playerList, playerCount) == 1) {
     //hold card index
     unsigned int cardIndex = 1;
@@ -480,6 +477,11 @@ int atLeastOnePlayerIn(Player *playerList, int *playerCount) {
 }
 
 //Save to file
+//Save 10 highest scores to file
+//Read from file
+//Then add current highscore
+//Sort using quicksort
+//Write the 10 highest score to file and display them on console
 void saveToFile(Player playerList[],int playerCount){
     
     //Get current game highscore
@@ -527,11 +529,11 @@ void saveToFile(Player playerList[],int playerCount){
             quickSort(highScoreList, 0, counter);
         }
         
-        //Write to file
+        //Write to file and display to console
         FILE *outFilePtr = fopen("game_data.txt", "w+");
         printf("\n\nHighscore:");
         printf("\n\t%s , $%d\n", highScoreList[counter].name, highScoreList[counter].cash);
-        fprintf(outFilePtr, "%s , %d\n", highScoreList[counter].name, highScoreList[counter].cash);
+        fprintf(outFilePtr, "%s , %d", highScoreList[counter].name, highScoreList[counter].cash);
         for (int i = counter-1; i >= 0; --i) {
             fprintf(outFilePtr, "\n%s , %d", highScoreList[i].name, highScoreList[i].cash);
             printf("\t%s , $%d\n", highScoreList[i].name, highScoreList[i].cash);
@@ -540,15 +542,14 @@ void saveToFile(Player playerList[],int playerCount){
 }
 
 //Quicksort section
-
-//swap 2 player
+//swap 2 player in playerArray[]
 void swap(Player playerArray[], int num1, int num2) {
     Player temp = playerArray[num1];
     playerArray[num1] = playerArray[num2];
     playerArray[num2] = temp;
 }
 
-//partion function
+//partition function
 int partition(Player playerArray[], int left, int right, int pivot) {
     int leftPointer = left -1;
     int rightPointer = right;

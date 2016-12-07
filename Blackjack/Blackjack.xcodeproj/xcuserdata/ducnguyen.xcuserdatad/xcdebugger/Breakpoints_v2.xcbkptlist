@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Blackjack/main.c"
-            timestampString = "502791470.12881"
+            timestampString = "502819799.739087"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "383"
-            endingLineNumber = "383"
+            startingLineNumber = "380"
+            endingLineNumber = "380"
             landmarkName = "getNewPoints()"
             landmarkType = "9">
          </BreakpointContent>
@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Blackjack/main.c"
-            timestampString = "502793152.304069"
+            timestampString = "502819799.739087"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "565"
-            endingLineNumber = "565"
+            startingLineNumber = "562"
+            endingLineNumber = "562"
             landmarkName = "partition()"
             landmarkType = "9">
          </BreakpointContent>
@@ -58,13 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Blackjack/main.c"
-            timestampString = "502793152.304069"
+            timestampString = "502819799.739087"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "555"
-            endingLineNumber = "555"
-            landmarkName = "partition()"
-            landmarkType = "9">
+            startingLineNumber = "552"
+            endingLineNumber = "552">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -74,11 +72,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Blackjack/main.c"
-            timestampString = "502793152.304069"
+            timestampString = "502819799.739087"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "536"
-            endingLineNumber = "536"
+            startingLineNumber = "533"
+            endingLineNumber = "533"
             landmarkName = "saveToFile()"
             landmarkType = "9">
          </BreakpointContent>
