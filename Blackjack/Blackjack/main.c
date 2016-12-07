@@ -274,7 +274,7 @@ LOOP:   while (atLeastOnePlayerIn(playerList, playerCount) == 1) {
                         //test
                         printf("\tCURRENT CASH: $%d\n", getPlayerCash(playerList[i]));
                     }
-                    if(pointArray[i]>21){
+                    else if(pointArray[i]>21){
                         printf("\n(%s) YOU LOSE! - Your point %d\n", playerList[i].name, pointArray[i]);
                         //test
                         printf("\tCURRENT CASH: $%d\n", getPlayerCash(playerList[i]));
@@ -529,8 +529,8 @@ void saveToFile(Player playerList[],int playerCount){
         
         //Write to file
         FILE *outFilePtr = fopen("game_data.txt", "w+");
-        fprintf(outFilePtr, "%s , %d", highScoreList[0].name, highScoreList[0].cash);
-        for (size_t i = 1; i<= counter; ++i) {
+        fprintf(outFilePtr, "%s , %d", highScoreList[counter].name, highScoreList[counter].cash);
+        for (int i = counter-1; i >= 0; --i) {
             fprintf(outFilePtr, "\n%s , %d", highScoreList[i].name, highScoreList[i].cash);
         }
     }
