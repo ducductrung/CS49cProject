@@ -529,9 +529,12 @@ void saveToFile(Player playerList[],int playerCount){
         
         //Write to file
         FILE *outFilePtr = fopen("game_data.txt", "w+");
-        fprintf(outFilePtr, "%s , %d", highScoreList[counter].name, highScoreList[counter].cash);
+        printf("\n\nHighscore:");
+        printf("\n\t%s , $%d\n", highScoreList[counter].name, highScoreList[counter].cash);
+        fprintf(outFilePtr, "%s , %d\n", highScoreList[counter].name, highScoreList[counter].cash);
         for (int i = counter-1; i >= 0; --i) {
             fprintf(outFilePtr, "\n%s , %d", highScoreList[i].name, highScoreList[i].cash);
+            printf("\t%s , $%d\n", highScoreList[i].name, highScoreList[i].cash);
         }
     }
 }
