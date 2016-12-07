@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Blackjack/main.c"
-            timestampString = "502782236.419387"
+            timestampString = "502791470.12881"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "333"
-            endingLineNumber = "333"
+            startingLineNumber = "383"
+            endingLineNumber = "383"
             landmarkName = "deal()"
             landmarkType = "9">
          </BreakpointContent>
@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Blackjack/main.c"
-            timestampString = "502782660.880494"
+            timestampString = "502791470.12881"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "508"
-            endingLineNumber = "508"
+            startingLineNumber = "562"
+            endingLineNumber = "562"
             landmarkName = "saveToFile()"
             landmarkType = "9">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Blackjack/main.c"
-            timestampString = "502782660.880494"
+            timestampString = "502791470.12881"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "498"
-            endingLineNumber = "498"
+            startingLineNumber = "552"
+            endingLineNumber = "552"
             landmarkName = "saveToFile()"
             landmarkType = "9">
          </BreakpointContent>
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Blackjack/main.c"
-            timestampString = "502782660.880494"
+            timestampString = "502791470.12881"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "484"
-            endingLineNumber = "484"
+            startingLineNumber = "538"
+            endingLineNumber = "538"
             landmarkName = "saveToFile()"
             landmarkType = "9">
          </BreakpointContent>
